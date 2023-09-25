@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Captioning</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+        .new-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #9ef5ff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        h1 {
+            color: #333;
+        }
+        
+        .upload-form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .upload-btn-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+        
+        .btn {
+            border: 2px solid gray;
+            color: gray;
+            background-color: white;
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        .upload-btn-wrapper input[type=file] {
+            font-size: 100px;
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+        }
+        
+        .file-label {
+            margin-left: 10px;
+        }
+        
+        #image-preview {
+            max-width: 200px;
+            height: auto;
+            margin-top: 20px;
+        }
+        
+        #caption {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Image Captioning</h1>
+        <div class="upload-form">
+            <form id="upload-form" action="/predict" method="post" enctype="multipart/form-data">
+                <div class="upload-btn-wrapper">
+                    <button class="btn">Choose an Image</button>
+                    <input type="file" name="file" id="image" accept="image/*">
+                </div>
+                <div class="file-label" id="file-label"></div>
+                <img id="image-preview" src="/static/uploads/" alt="Uploaded Image">
+                <div id="caption"></div>
+                <button type="submit" class="btn-submit">Submit</button> 
+            </form>
+        </div>
+        
+        
+    </div>
+
+    <div class="new-container" id="prediction-result"></div>
+    
+
+    <script>
+        const form = document.getElementById('upload-form');
+        const fileInput = document.getElementById('image');
+        const imagePreview = document.getElementById('image-preview');
+        const captionDiv = document.getElementById('caption');
+        const resultDiv = document.getElementById('prediction-result'); // Add this line
+
+        
+    
+        form.addEventListener('submit', function (e) {
+            e.preventDefault(); // Prevent form submission
+            if (fileInput.files.length > 0) {
+                const formData = new FormData(form);
+
+                fetch('/predict', {
+                    method: 'POST',
+                    body: formData,
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const caption = data.caption;
+    
+                    resultDiv.innerHTML = `<strong>Predicted Caption:</strong> ${caption}`;
+    
+
+                    imagePreview.src = '';
+                    captionDiv.textContent = '';
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            }
+        });
+    
+        fileInput.addEventListener('change', function () {
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                const imageURL = URL.createObjectURL(file);
+                imagePreview.src = imageURL;
+                captionDiv.textContent = '';
+                resultDiv.innerHTML = ''; 
+            } else {
+                imagePreview.src = '';
+                captionDiv.textContent = '';
+                resultDiv.innerHTML = ''; 
+            }
+        });
+    </script>
+    
+</body>
+</html>
